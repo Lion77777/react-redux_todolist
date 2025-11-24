@@ -4,6 +4,9 @@ export const todolistsSlice = createSlice({
   name: 'todolists',
   initialState: [] as Todolist[],
   reducers: create => ({
+    setTodolistsAC: create.reducer<{ todolists: Todolist[] }>((state, action) => {
+      return action.payload.todolists
+    }),
     createTodolistAC: create.preparedReducer(
       (title: string) => {
         const id = nanoid()
@@ -37,7 +40,13 @@ export const todolistsSlice = createSlice({
   })
 })
 
-export const { deleteTodolistAC, changeTodolistTitleAC, changeTodolistFilterAC, createTodolistAC } = todolistsSlice.actions
+export const {
+  deleteTodolistAC,
+  changeTodolistTitleAC,
+  changeTodolistFilterAC,
+  createTodolistAC,
+  setTodolistsAC
+} = todolistsSlice.actions
 export const todolistsReducer = todolistsSlice.reducer
 
 export type Todolist = {
