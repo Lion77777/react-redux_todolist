@@ -1,6 +1,6 @@
 import { useAppDispatch } from "@/common/hooks"
 import { FilterButtons } from "./FilterButtons/FilterButtons"
-import { createTaskAC } from "@/features/todolists/model/tasks-reducer"
+import { createTaskAC } from "@/features/todolists/model/tasks-slice"
 import type { Todolist } from "@/features/todolists/model/todolists-slice"
 import { Tasks } from "./Tasks/Tasks"
 import { TodolistTitle } from "./TodolistTitle/TodolistTitle"
