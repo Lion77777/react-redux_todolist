@@ -1,5 +1,5 @@
 import { createAction, createReducer, nanoid } from "@reduxjs/toolkit"
-import { createTodolistAC, deleteTodolistAC } from "./todolists-reducer"
+import { createTodolistAC, deleteTodolistAC } from "./todolists-slice"
 
 export const deleteTaskAC = createAction<{ todolistId: string; taskId: string }>("tasks/deleteTask")
 export const createTaskAC = createAction<{ todolistId: string; title: string }>("tasks/createTask")
