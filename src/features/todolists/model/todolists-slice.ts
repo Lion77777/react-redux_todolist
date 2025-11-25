@@ -35,6 +35,9 @@ export const todolistsSlice = createSlice({
           state.splice(index, 1)
         }
       })
+  },
+  selectors: {
+    selectTodolists: (state: DomaintTodolist[]) => state
   }
 })
 
@@ -86,11 +89,11 @@ export const deleteTodolistTC = createAsyncThunk(`${todolistsSlice.name}/deleteT
   }
 )
 
-export const {
-  changeTodolistFilterAC,
+export const { changeTodolistFilterAC,
 } = todolistsSlice.actions
 
 export const todolistsReducer = todolistsSlice.reducer
+export const { selectTodolists } = todolistsSlice.selectors
 
 export type DomaintTodolist = Todolist & {
   filter: FilterValues
