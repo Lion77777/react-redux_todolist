@@ -1,12 +1,13 @@
-import { createSlice, nanoid } from "@reduxjs/toolkit"
+import { createAsyncThunk, createSlice, nanoid } from "@reduxjs/toolkit"
 import { Todolist } from "../api/todolistsApi.types"
+import { todolistsApi } from "../api/todolistsApi"
 
 export const todolistsSlice = createSlice({
   name: 'todolists',
   initialState: [] as DomaintTodolist[],
   reducers: create => ({
-    setTodolistsAC: create.reducer<{ todolists: Todolist[] }>((state, action) => {
-      return action.payload.todolists.map(todolist => ({...todolist, filter: 'all'}))
+    setTodolistsAC: create.reducer<{ todolists: Todolist[] }>((_, action) => {
+      return action.payload.todolists.map(todolist => ({ ...todolist, filter: 'all' }))
     }),
     createTodolistAC: create.preparedReducer(
       (title: string) => {
@@ -41,6 +42,14 @@ export const todolistsSlice = createSlice({
   })
 })
 
+export const fetchTodolistsTC = createAsyncThunk(`${todolistsSlice.name}/fetchTodolistsTC`, 
+  (_, thunkApi) => {
+    todolistsApi.getTodolists().then(res => {
+      thunkApi.dispatch(setTodolistsAC({todolists: res.data}))
+    })
+  }
+)
+
 export const {
   deleteTodolistAC,
   changeTodolistTitleAC,
@@ -48,6 +57,7 @@ export const {
   createTodolistAC,
   setTodolistsAC
 } = todolistsSlice.actions
+
 export const todolistsReducer = todolistsSlice.reducer
 
 export type DomaintTodolist = Todolist & {
