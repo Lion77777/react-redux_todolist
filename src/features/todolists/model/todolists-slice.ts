@@ -6,9 +6,6 @@ export const todolistsSlice = createSlice({
   name: 'todolists',
   initialState: [] as DomaintTodolist[],
   reducers: create => ({
-    setTodolistsAC: create.reducer<{ todolists: Todolist[] }>((_, action) => {
-      return action.payload.todolists.map(todolist => ({ ...todolist, filter: 'all' }))
-    }),
     createTodolistAC: create.preparedReducer(
       (title: string) => {
         const id = nanoid()
@@ -39,14 +36,23 @@ export const todolistsSlice = createSlice({
         todolist.filter = action.payload.filter
       }
     })
-  })
+  }),
+  extraReducers: builder => {
+    builder.addCase(fetchTodolistsTC.fulfilled, (_, action) => {
+      return action.payload.todolists.map(todolist => ({...todolist, filter: 'all'}))
+    })
+  }
 })
 
 export const fetchTodolistsTC = createAsyncThunk(`${todolistsSlice.name}/fetchTodolistsTC`, 
-  (_, thunkApi) => {
-    todolistsApi.getTodolists().then(res => {
-      thunkApi.dispatch(setTodolistsAC({todolists: res.data}))
-    })
+  async (_, thunkApi) => {
+    try {
+      const response = await todolistsApi.getTodolists()
+
+      return {todolists: response.data}
+    } catch(error) {
+      return thunkApi.rejectWithValue(error)
+    }
   }
 )
 
@@ -54,8 +60,7 @@ export const {
   deleteTodolistAC,
   changeTodolistTitleAC,
   changeTodolistFilterAC,
-  createTodolistAC,
-  setTodolistsAC
+  createTodolistAC
 } = todolistsSlice.actions
 
 export const todolistsReducer = todolistsSlice.reducer
