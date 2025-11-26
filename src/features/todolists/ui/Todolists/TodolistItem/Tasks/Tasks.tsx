@@ -4,6 +4,7 @@ import { TaskItem } from "./TaskItem/TaskItem"
 import List from "@mui/material/List"
 import { fetchTasksTC, selectTasks } from "@/features/todolists/model/tasks-slice"
 import { useEffect } from "react"
+import { TaskStatus } from "@/common/enums"
 
 type Props = {
   todolist: DomaintTodolist
@@ -22,10 +23,10 @@ export const Tasks = ({ todolist }: Props) => {
   const todolistTasks = tasks[id]
   let filteredTasks = todolistTasks
   if (filter === "active") {
-    filteredTasks = todolistTasks.filter((task) => !task.isDone)
+    filteredTasks = todolistTasks.filter((task) => task.status !== TaskStatus.Completed)
   }
   if (filter === "completed") {
-    filteredTasks = todolistTasks.filter((task) => task.isDone)
+    filteredTasks = todolistTasks.filter((task) => task.status === TaskStatus.Completed)
   }
 
   return (
