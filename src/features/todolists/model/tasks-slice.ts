@@ -1,12 +1,31 @@
 import { createSlice, nanoid } from "@reduxjs/toolkit"
 import { createTodolistTC, deleteTodolistTC } from "./todolists-slice"
+import { createAppSlice } from "@/common/utils"
+import { tasksApi } from "../api/tasksApi"
+import { DomainTask } from "../api/tasksApi.types"
 
 const initialState: TasksState = {}
 
-export const tasksSlice = createSlice({
+export const tasksSlice = createAppSlice({
   name: 'tasks',
   initialState,
   reducers: create => ({
+    fetchTasksTC: create.asyncThunk(
+      async (todolistId: string, thunkApi) => {
+        try {
+        const response = await tasksApi.getTasks(todolistId)
+
+          return {todolistId, tasks: response.data.items}
+        } catch(error) {
+          return thunkApi.rejectWithValue(error)
+        }
+      },
+      {
+        fulfilled: (state, action) => {
+          state[action.payload.todolistId] = action.payload.tasks
+        }
+      }
+    ),
     createTaskAC: create.preparedReducer(
       (payload: { todolistId: string, title: string }) => {
         const id = nanoid()
@@ -52,14 +71,14 @@ export const tasksSlice = createSlice({
   }
 })
 
-export const { createTaskAC, deleteTaskAC, changeTaskTitleAC, changeTaskStatusAC } = tasksSlice.actions
+export const { createTaskAC, deleteTaskAC, changeTaskTitleAC, changeTaskStatusAC, fetchTasksTC } = tasksSlice.actions
 export const tasksReducer = tasksSlice.reducer
 export const { selectTasks } = tasksSlice.selectors
 
-export type Task = {
-  id: string
-  title: string
-  isDone: boolean
-}
+// export type Task = {
+//   id: string
+//   title: string
+//   isDone: boolean
+// }
 
-export type TasksState = Record<string, Task[]>
+export type TasksState = Record<string, DomainTask[]>
