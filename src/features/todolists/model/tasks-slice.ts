@@ -144,7 +144,7 @@ export const tasksSlice = createAppSlice({
   }),
   extraReducers: builder => {
     builder.addCase(createTodolistTC.fulfilled, (state, action) => {
-      state[action.payload.id] = []
+      state[action.payload.todolist.id] = []
     })
       .addCase(deleteTodolistTC.fulfilled, (state, action) => {
         delete state[action.payload.id]
