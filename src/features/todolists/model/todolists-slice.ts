@@ -1,4 +1,3 @@
-import { createAsyncThunk } from "@reduxjs/toolkit"
 import { Todolist } from "../api/todolistsApi.types"
 import { todolistsApi } from "../api/todolistsApi"
 import { createAppSlice } from "@/common/utils"
@@ -68,6 +67,26 @@ export const todolistsSlice = createAppSlice({
         }
       }
     ),
+    changeTodolistTitleTC: create.asyncThunk(
+      async (payload: {id: string, title: string}, thunkApi) => {
+        try {
+          await todolistsApi.changeTodolistTitle(payload)
+
+          return {...payload}
+        } catch(error) {
+          return thunkApi.rejectWithValue(error)
+        }
+      },
+      {
+        fulfilled: (state, action) => {
+          const todolist = state.find(todolist => todolist.id === action.payload.id)
+
+          if(todolist) {
+            todolist.title = action.payload.title
+          }
+        }
+      }
+    ),
     changeTodolistFilterAC: create.reducer<{ id: string, filter: FilterValues }>((state, action) => {
       const todolist = state.find(todolist => todolist.id === action.payload.id)
 
@@ -76,34 +95,17 @@ export const todolistsSlice = createAppSlice({
       }
     })
   }),
-  extraReducers: builder => {
-    builder
-      .addCase(changeTodolistTitleTC.fulfilled, (state, action) => {
-        const todolist = state.find(todolist => todolist.id === action.payload.id)
-
-        if (todolist) {
-          todolist.title = action.payload.title
-        }
-      })
-  },
   selectors: {
     selectTodolists: (state: DomaintTodolist[]) => state
   }
 })
 
-export const changeTodolistTitleTC = createAsyncThunk(`${todolistsSlice.name}/changeTodolistTitleTC`,
-  async (payload: { id: string, title: string }, thunkApi) => {
-    try {
-      await todolistsApi.changeTodolistTitle(payload)
-
-      return payload
-    } catch (error) {
-      return thunkApi.rejectWithValue(error)
-    }
-  }
-)
-
-export const { changeTodolistFilterAC, fetchTodolistsTC, createTodolistTC, deleteTodolistTC
+export const { 
+  changeTodolistFilterAC, 
+  fetchTodolistsTC, 
+  createTodolistTC, 
+  deleteTodolistTC,
+  changeTodolistTitleTC
 } = todolistsSlice.actions
 
 export const todolistsReducer = todolistsSlice.reducer
