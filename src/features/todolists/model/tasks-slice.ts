@@ -3,6 +3,8 @@ import { createAppSlice } from "@/common/utils"
 import { tasksApi } from "../api/tasksApi"
 import { DomainTask, UpdateTaskModel } from "../api/tasksApi.types"
 import { RootState } from "@/app/store"
+import { setAppErrorAC, setAppStatusAC } from "@/app/app-slice"
+import { ResultCode } from "@/common/enums"
 
 const initialState: TasksState = {}
 
@@ -27,13 +29,31 @@ export const tasksSlice = createAppSlice({
       }
     ),
     createTaskTC: create.asyncThunk(
-      async (payload: { todolistId: string, title: string }, thunkApi) => {
+      async (payload: { todolistId: string, title: string }, { dispatch, rejectWithValue }) => {
         try {
+          dispatch(setAppStatusAC({ status: 'loading' }))
+
           const response = await tasksApi.createTask(payload)
 
-          return { task: response.data.data.item }
+          if (response.data.resultCode === ResultCode.Success) {
+            dispatch(setAppStatusAC({ status: 'succeeded' }))
+
+            return { task: response.data.data.item }
+          } else {
+            if (response.data.messages.length) {
+              dispatch(setAppErrorAC({ error: response.data.messages[0] }))
+            } else {
+              dispatch(setAppErrorAC({ error: "Some error occured" }))
+            }
+
+            dispatch(setAppStatusAC({ status: 'failed' }))
+
+            return rejectWithValue(null)
+          }
         } catch (error) {
-          return thunkApi.rejectWithValue(error)
+          dispatch(setAppStatusAC({ status: 'failed' }))
+
+          return rejectWithValue(error)
         }
       },
       {
@@ -79,17 +99,17 @@ export const tasksSlice = createAppSlice({
         try {
           const response = await tasksApi.updateTask({ todolistId, taskId, model: updateTask })
 
-          return {task: response.data.data.item}
+          return { task: response.data.data.item }
         } catch (error) {
           return rejectWithValue(error)
         }
       },
       {
         fulfilled: (state, action) => {
-          const {id, todoListId} = action.payload.task
+          const { id, todoListId } = action.payload.task
           const index = state[todoListId].findIndex(task => task.id === id)
 
-          if(index !== -1) {
+          if (index !== -1) {
             state[todoListId].splice(index, 1, action.payload.task)
           }
         }
